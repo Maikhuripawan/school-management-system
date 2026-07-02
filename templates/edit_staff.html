@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow mt-6">
+    <h2 class="text-xl font-bold mb-4 text-gray-700 border-b pb-2">✏️ Update Staff Member Details</h2>
+    
+    <form action="/staff/edit/{{ staff['id'] }}" method="POST" class="space-y-4 text-sm">
+        <div>
+            <label class="block font-medium text-gray-600">Full Name*</label>
+            <input type="text" name="full_name" value="{{ staff['full_name'] }}" class="w-full border p-2 rounded mt-1" required>
+        </div>
+
+        <div>
+            <label class="block font-medium text-gray-600">Designation*</label>
+            <input type="text" name="designation" value="{{ staff['designation'] }}" class="w-full border p-2 rounded mt-1" required>
+        </div>
+
+        <div>
+            <label class="block font-medium text-gray-600">Department</label>
+            <input type="text" name="department" value="{{ staff['department'] }}" class="w-full border p-2 rounded mt-1">
+        </div>
+
+        <div>
+            <label class="block font-medium text-gray-600">Phone Number (10 digits)</label>
+            <input type="text" name="phone" value="{{ staff['phone'] }}" pattern="[0-9]{10}" maxlength="10" class="w-full border p-2 rounded mt-1">
+        </div>
+
+        <div>
+            <label class="block font-medium text-gray-600">Email ID</label>
+            <input type="email" name="email" value="{{ staff['email'] }}" class="w-full border p-2 rounded mt-1">
+        </div>
+
+        <div class="flex gap-2 pt-4">
+            <button type="submit" class="flex-1 bg-blue-600 text-white p-2.5 rounded font-semibold hover:bg-blue-700 transition shadow">Save Changes</button>
+            <a href="/staff" class="text-center bg-gray-200 text-gray-700 p-2.5 rounded font-semibold hover:bg-gray-300 transition w-32">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

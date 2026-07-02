@@ -229,30 +229,51 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div>
+                        <<div>
                             <label class="block font-medium text-gray-600">State</label>
-                            <input type="text" name="state" class="w-full border p-2 rounded mt-1">
+                        
+                            <input
+                                type="text"
+                                name="state"
+                                value="Uttarakhand"
+                                class="w-full border p-2 rounded mt-1 bg-gray-100"
+                                readonly
+                            >
                         </div>
-                        <div>
+                        <<div>
                             <label class="block font-medium text-gray-600">District</label>
                         
-                            <select name="district" class="w-full border p-2 rounded mt-1" required>
+                            <select id="district" name="district" class="w-full border p-2 rounded mt-1">
                                 <option value="">-- Select District --</option>
-                                <option value="Almora">Almora</option>
-                                <option value="Bageshwar">Bageshwar</option>
-                                <option value="Chamoli">Chamoli</option>
-                                <option value="Champawat">Champawat</option>
-                                <option value="Dehradun">Dehradun</option>
-                                <option value="Haridwar">Haridwar</option>
-                                <option value="Nainital">Nainital</option>
-                                <option value="Pauri Garhwal">Pauri Garhwal</option>
-                                <option value="Pithoragarh">Pithoragarh</option>
-                                <option value="Rudraprayag">Rudraprayag</option>
-                                <option value="Tehri Garhwal">Tehri Garhwal</option>
-                                <option value="Udham Singh Nagar">Udham Singh Nagar</option>
-                                <option value="Uttarkashi">Uttarkashi</option>
                             </select>
                         </div>
+                        
+                        <script>
+                        const districts = [
+                            "Almora",
+                            "Bageshwar",
+                            "Chamoli",
+                            "Champawat",
+                            "Dehradun",
+                            "Haridwar",
+                            "Nainital",
+                            "Pauri Garhwal",
+                            "Pithoragarh",
+                            "Rudraprayag",
+                            "Tehri Garhwal",
+                            "Udham Singh Nagar",
+                            "Uttarkashi"
+                        ];
+                        
+                        const districtSelect = document.getElementById("district");
+                        
+                        districts.forEach(district => {
+                            const option = document.createElement("option");
+                            option.value = district;
+                            option.textContent = district;
+                            districtSelect.appendChild(option);
+                        });
+                        </script>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>

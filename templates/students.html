@@ -210,26 +210,52 @@
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block font-medium text-gray-600">Guardian Name</label>
-                            <input type="text" name="guardian_name" class="w-full border p-2 rounded mt-1">
-                        </div>
-                        <div>
-                            <label class="block font-medium text-gray-600">Guardian Phone (10 digits)</label>
-                            <input type="text" name="guardian_phone" pattern="[0-9]{10}" maxlength="10" placeholder="e.g. 9876543210" title="Phone number must be exactly 10 digits" class="w-full border p-2 rounded mt-1">
-                        </div>
+                            <div class="grid grid-cols-2 gap-2">
+
+                                <!-- Guardian Selection -->
+                                <div>
+                                    <label class="block font-medium text-gray-600">Guardian</label>
+                            
+                                    <select id="guardianSelect" name="guardian_relation"
+                                        class="w-full border p-2 rounded mt-1"
+                                        onchange="fillGuardianDetails()">
+                            
+                                        <option value="">Select Guardian</option>
+                                        <option value="Father">Father</option>
+                                        <option value="Mother">Mother</option>
+                                    </select>
+                                </div>
+                            
+                                <!-- Guardian Name -->
+                                <div>
+                                    <label class="block font-medium text-gray-600">Guardian Name</label>
+                            
+                                    <input type="text"
+                                        id="guardian_name"
+                                        name="guardian_name"
+                                        class="w-full border p-2 rounded mt-1"
+                                        readonly>
+                                </div>
+                            
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                            
+                                <!-- Guardian Phone -->
+                                <div>
+                                    <label class="block font-medium text-gray-600">Guardian Phone</label>
+                            
+                                    <input type="text"
+                                        id="guardian_phone"
+                                        name="guardian_phone"
+                                        class="w-full border p-2 rounded mt-1"
+                                        readonly>
+                                </div>
+                            
+                            </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block font-medium text-gray-600">Guardian Rel.</label>
-                            <input type="text" name="guardian_relation" class="w-full border p-2 rounded mt-1">
-                        </div>
-                        <div>
-                            <label class="block font-medium text-gray-600">Annual Income</label>
-                            <input type="text" name="annual_income" class="w-full border p-2 rounded mt-1">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <<div>
                             <label class="block font-medium text-gray-600">State</label>
                         
                             <input
@@ -240,7 +266,7 @@
                                 readonly
                             >
                         </div>
-                        <<div>
+                    <div>
                             <label class="block font-medium text-gray-600">District</label>
                         
                             <select id="district" name="district" class="w-full border p-2 rounded mt-1">

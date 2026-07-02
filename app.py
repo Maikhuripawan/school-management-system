@@ -1,6 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, send_file
+from flask import Flask, render_template, redirect, url_for, request, flash, send_file, abort
 import sqlite3
 import pandas as pd
+import numpy as np
 import io
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
@@ -11,18 +12,70 @@ import os
 app = Flask(__name__)
 app.secret_key = "super_secret_school_key"
 
+# --- DATABASE PATH SETUP (Cloud-Safe Handling) ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'school.db')
+
+# Connection helper using dynamic path
 def get_db_connection():
-    conn = sqlite3.connect('school.db')
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
+# --- AUTO INITIALIZE DATABASE (Crucial for Render Deployment) ---
+try:
+    from database import init_db
+    init_db()
+except Exception as e:
+    print(f"Database initialization info/error: {str(e)} - app.py:30")
+
+# Nayi CSV file ko safely load karne ka helper function
+def load_schools_csv():
+    csv_path = os.path.join(BASE_DIR, "schools (1).csv")
+    if os.path.exists(csv_path):
+        df = pd.read_csv(csv_path)
+        # Empty rows/cells ko None me badlein taaki HTML templates me error na aaye
+        df = df.replace({np.nan: None})
+        # Phone numbers se .0 hatane ke liye string formatting
+        if 'Phone' in df.columns:
+            df['Phone'] = df['Phone'].apply(lambda x: str(int(x)) if x is not None else '')
+        return df
+    return pd.DataFrame()
+
+# --- HOME / DASHBOARD ROUTE ---
 @app.route('/')
 def index():
     conn = get_db_connection()
     student_count = conn.execute('SELECT COUNT(*) FROM students').fetchone()[0]
     staff_count = conn.execute('SELECT COUNT(*) FROM staff').fetchone()[0]
     conn.close()
-    return render_template('index.html', student_count=student_count, staff_count=staff_count)
+    
+    # Dashboard par hi hum saari 500 schools ki list bhi display karwa denge
+    df_schools = load_schools_csv()
+    schools_list = []
+    if not df_schools.empty:
+        schools_list = df_schools[['Name', 'UDISE', 'District', 'Type']].to_dict(orient='records')
+        
+    return render_template('index.html', 
+                           student_count=student_count, 
+                           staff_count=staff_count, 
+                           schools=schools_list)
+
+# --- NEW: SINGLE SCHOOL DETAIL ROUTE ---
+@app.route('/school/<int:udise_code>')
+def school_detail(udise_code):
+    df_schools = load_schools_csv()
+    if df_schools.empty:
+        return "Schools data file not found.", 404
+        
+    # UDISE code ke base par filter karein
+    school_data = df_schools[df_schools['UDISE'] == udise_code].to_dict(orient='records')
+    
+    if school_data:
+        # Humne jo school.html banaya tha, usko single school ka data bhej rahe hain
+        return render_template('school.html', school=school_data[0])
+    
+    abort(404)
 
 # --- STUDENTS ROUTES ---
 @app.route('/students', methods=['GET', 'POST'])
@@ -189,6 +242,4 @@ def export_pdf(type):
     return send_file(out, as_attachment=True, download_name=f"{type}_report.pdf")
 
 if __name__ == '__main__':
-    from database import init_db
-    init_db() 
     app.run(debug=True)

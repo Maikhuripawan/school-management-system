@@ -4,7 +4,7 @@ def init_db():
     conn = sqlite3.connect('school.db')
     cursor = conn.cursor()
     
-    # 1. Students Table (According to your template)
+    # 1. Students Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,7 +53,7 @@ def init_db():
         )
     ''')
     
-    # 2. Staff Table (According to your template)
+    # 2. Staff Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS staff (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

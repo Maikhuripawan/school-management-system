@@ -24,21 +24,17 @@ def get_db_connection():
 
 # --- AUTO INITIALIZE DATABASE ---
 try:
-    # Agar database file isi folder me hai toh use module ki tarah nahi, 
-    # balki direct uski init_db function ko run kar rahe hain
     import database
     database.init_db()
 except Exception as e:
-    print(f"Database initialization info/error: {str(e)} - app.py:32")
+    print(f"Database initialization info/error: {str(e)} - app.py:30")
 
 # Nayi CSV file ko safely load karne ka helper function
 def load_schools_csv():
     csv_path = os.path.join(BASE_DIR, "schools (1).csv")
     if os.path.exists(csv_path):
         df = pd.read_csv(csv_path)
-        # Empty rows/cells ko None me badlein taaki HTML templates me error na aaye
         df = df.replace({np.nan: None})
-        # Phone numbers se .0 hatane ke liye string formatting
         if 'Phone' in df.columns:
             df['Phone'] = df['Phone'].apply(lambda x: str(int(x)) if x is not None else '')
         return df
@@ -52,7 +48,6 @@ def index():
     staff_count = conn.execute('SELECT COUNT(*) FROM staff').fetchone()[0]
     conn.close()
     
-    # Dashboard par hi hum saari 500 schools ki list bhi display karwa denge
     df_schools = load_schools_csv()
     schools_list = []
     if not df_schools.empty:
@@ -63,18 +58,15 @@ def index():
                            staff_count=staff_count, 
                            schools=schools_list)
 
-# --- NEW: SINGLE SCHOOL DETAIL ROUTE ---
+# --- SINGLE SCHOOL DETAIL ROUTE ---
 @app.route('/school/<int:udise_code>')
 def school_detail(udise_code):
     df_schools = load_schools_csv()
     if df_schools.empty:
         return "Schools data file not found.", 404
         
-    # UDISE code ke base par filter karein
     school_data = df_schools[df_schools['UDISE'] == udise_code].to_dict(orient='records')
-    
     if school_data:
-        # Humne jo school.html banaya tha, usko single school ka data bhej rahe hain
         return render_template('school.html', school=school_data[0])
     
     abort(404)
@@ -104,6 +96,54 @@ def students():
     students_list = conn.execute('SELECT * FROM students').fetchall()
     conn.close()
     return render_template('students.html', students=students_list)
+
+# --- WORKING: EDIT STUDENT ROUTE ---
+@app.route('/students/edit/<int:student_id>', methods=['GET', 'POST'])
+def edit_student(student_id):
+    conn = get_db_connection()
+    student = conn.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+    
+    if student is None:
+        conn.close()
+        abort(404)
+        
+    if request.method == 'POST':
+        data = request.form
+        try:
+            conn.execute('''
+                UPDATE students 
+                SET full_name = ?, gender = ?, grade_class = ?, section = ?, roll_no = ?, 
+                    admission_no = ?, dob = ?, aadhaar_no = ?, father_name = ?, father_phone = ?
+                WHERE id = ?''',
+                (
+                    data.get('full_name'), data.get('gender'), data.get('grade_class'), 
+                    data.get('section'), data.get('roll_no'), data.get('admission_no'), 
+                    data.get('dob'), data.get('aadhaar_no'), data.get('father_name'), 
+                    data.get('father_phone'), student_id
+                )
+            )
+            conn.commit()
+            flash("Student record updated successfully!", "success")
+            return redirect(url_for('students'))
+        except Exception as e:
+            flash(f"Error updating record: {str(e)}", "danger")
+            
+    conn.close()
+    return render_template('edit_student.html', student=student)
+
+# --- WORKING: DELETE STUDENT ROUTE ---
+@app.route('/students/delete/<int:student_id>', methods=['POST'])
+def delete_student(student_id):
+    conn = get_db_connection()
+    try:
+        conn.execute('DELETE FROM students WHERE id = ?', (student_id,))
+        conn.commit()
+        flash("Student record deleted successfully!", "success")
+    except Exception as e:
+        flash(f"Error deleting record: {str(e)}", "danger")
+    finally:
+        conn.close()
+    return redirect(url_for('students'))
 
 @app.route('/students/upload', methods=['POST'])
 def upload_students():
@@ -156,6 +196,53 @@ def staff():
     staff_list = conn.execute('SELECT * FROM staff').fetchall()
     conn.close()
     return render_template('staff.html', staff=staff_list)
+
+# --- WORKING: EDIT STAFF ROUTE ---
+@app.route('/staff/edit/<int:staff_id>', methods=['GET', 'POST'])
+def edit_staff(staff_id):
+    conn = get_db_connection()
+    staff_member = conn.execute('SELECT * FROM staff WHERE id = ?', (staff_id,)).fetchone()
+    
+    if staff_member is None:
+        conn.close()
+        abort(404)
+        
+    if request.method == 'POST':
+        data = request.form
+        try:
+            conn.execute('''
+                UPDATE staff 
+                SET full_name = ?, gender = ?, staff_type = ?, designation = ?, 
+                    department = ?, employee_id = ?, phone = ?, email = ?
+                WHERE id = ?''',
+                (
+                    data.get('full_name'), data.get('gender'), data.get('staff_type'), 
+                    data.get('designation'), data.get('department'), data.get('employee_id'), 
+                    data.get('phone'), data.get('email'), staff_id
+                )
+            )
+            conn.commit()
+            flash("Staff record updated successfully!", "success")
+            return redirect(url_for('staff'))
+        except Exception as e:
+            flash(f"Error updating staff record: {str(e)}", "danger")
+            
+    conn.close()
+    return render_template('edit_staff.html', staff=staff_member)
+
+# --- WORKING: DELETE STAFF ROUTE ---
+@app.route('/staff/delete/<int:staff_id>', methods=['POST'])
+def delete_staff(staff_id):
+    conn = get_db_connection()
+    try:
+        conn.execute('DELETE FROM staff WHERE id = ?', (staff_id,))
+        conn.commit()
+        flash("Staff record deleted successfully!", "success")
+    except Exception as e:
+        flash(f"Error deleting staff record: {str(e)}", "danger")
+    finally:
+        conn.close()
+    return redirect(url_for('staff'))
 
 @app.route('/staff/upload', methods=['POST'])
 def upload_staff():

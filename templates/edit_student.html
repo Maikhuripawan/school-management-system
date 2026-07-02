@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow mt-6">
+    <h2 class="text-xl font-bold mb-4 text-gray-700 border-b pb-2">✏️ Update Student Information</h2>
+    
+    <form action="/students/edit/{{ student['id'] }}" method="POST" class="space-y-4 text-sm">
+        
+        <div>
+            <label class="block font-medium text-gray-600">Full Name*</label>
+            <input type="text" name="full_name" value="{{ student['full_name'] }}" class="w-full border p-2 rounded mt-1" required>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block font-medium text-gray-600">Grade/Class*</label>
+                <input type="text" name="grade_class" value="{{ student['grade_class'] }}" class="w-full border p-2 rounded mt-1" required>
+            </div>
+            <div>
+                <label class="block font-medium text-gray-600">Section</label>
+                <input type="text" name="section" value="{{ student['section'] }}" class="w-full border p-2 rounded mt-1">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block font-medium text-gray-600">Roll No</label>
+                <input type="text" name="roll_no" value="{{ student['roll_no'] }}" class="w-full border p-2 rounded mt-1">
+            </div>
+            <div>
+                <label class="block font-medium text-gray-600">Admission No</label>
+                <input type="text" name="admission_no" value="{{ student['admission_no'] }}" class="w-full border p-2 rounded mt-1">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block font-medium text-gray-600">Father's Name</label>
+                <input type="text" name="father_name" value="{{ student['father_name'] }}" class="w-full border p-2 rounded mt-1">
+            </div>
+            <div>
+                <label class="block font-medium text-gray-600">Father's Phone</label>
+                <input type="text" name="father_phone" value="{{ student['father_phone'] }}" pattern="[0-9]{10}" class="w-full border p-2 rounded mt-1">
+            </div>
+        </div>
+
+        <div class="flex gap-2 pt-4">
+            <button type="submit" class="flex-1 bg-blue-600 text-white p-2.5 rounded font-semibold hover:bg-blue-700 transition shadow">Save Changes</button>
+            <a href="/students" class="text-center bg-gray-200 text-gray-700 p-2.5 rounded font-semibold hover:bg-gray-300 transition w-32">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

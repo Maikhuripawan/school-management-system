@@ -22,12 +22,14 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# --- AUTO INITIALIZE DATABASE (Crucial for Render Deployment) ---
+# --- AUTO INITIALIZE DATABASE ---
 try:
-    from database import init_db
-    init_db()
+    # Agar database file isi folder me hai toh use module ki tarah nahi, 
+    # balki direct uski init_db function ko run kar rahe hain
+    import database
+    database.init_db()
 except Exception as e:
-    print(f"Database initialization info/error: {str(e)} - app.py:30")
+    print(f"Database initialization info/error: {str(e)} - app.py:32")
 
 # Nayi CSV file ko safely load karne ka helper function
 def load_schools_csv():

@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Student Database Management</h1>
+    <div class="space-x-2">
+        <a href="/export/excel/students" class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">📥 Export Excel</a>
+        <a href="/export/pdf/students" class="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700">📥 Export PDF</a>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="p-4 mb-4 text-sm rounded bg-{{ 'green' if category == 'success' else 'red' }}-100 text-{{ 'green' if category == 'success' else 'red' }}-700">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="bg-white p-4 rounded shadow mb-6">
+    <h2 class="text-lg font-semibold mb-2">Bulk Upload Student Sheet (.xlsx)</h2>
+    <form action="/students/upload" method="POST" enctype="multipart/form-data" class="flex gap-4">
+        <input type="file" name="file" accept=".xlsx, .xls" class="border p-2 rounded" required>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload Data</button>
+    </form>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white p-6 rounded shadow lg:col-span-1">
+        <h2 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Add New Students (Manual)</h2>
+        <form action="/students" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-600">Full Name*</label>
+                <input type="text" name="full_name" class="w-full border p-2 rounded mt-1 text-sm" placeholder="e.g. Rahul Sharma" required>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Gender* (M/F)</label>
+                    <select name="gender" class="w-full border p-2 rounded mt-1 text-sm" required>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Class*</label>
+                    <input type="text" name="grade_class" class="w-full border p-2 rounded mt-1 text-sm" placeholder="e.g. 10th" required>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Section</label>
+                    <input type="text" name="section" class="w-full border p-2 rounded mt-1 text-sm" placeholder="e.g. A">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Roll Number</label>
+                    <input type="text" name="roll_no" class="w-full border p-2 rounded mt-1 text-sm" placeholder="e.g. 12">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600">Admission No</label>
+                <input type="text" name="admission_no" class="w-full border p-2 rounded mt-1 text-sm" placeholder="e.g. ADM101">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Date of Birth</label>
+                    <input type="date" name="dob" class="w-full border p-2 rounded mt-1 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Aadhaar No</label>
+                    <input type="text" name="aadhaar_no" class="w-full border p-2 rounded mt-1 text-sm" placeholder="12 Digit No">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Father's Name</label>
+                    <input type="text" name="father_name" class="w-full border p-2 rounded mt-1 text-sm" placeholder="e.g. Sunil Sharma">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Father's Phone</label>
+                    <input type="text" name="father_phone" class="w-full border p-2 rounded mt-1 text-sm" placeholder="10 Digit Number">
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-green-600 text-white p-2 rounded font-semibold hover:bg-green-700 transition">Save Entry</button>
+        </form>
+    </div>
+</div>
+
+<div class="bg-white p-6 rounded shadow overflow-x-auto">
+    <h2 class="text-lg font-semibold mb-4 text-gray-700">All Registered Students</h2>
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="bg-gray-200 text-gray-700">
+                <th class="p-3 border">Name</th>
+                <th class="p-3 border">Class</th>
+                <th class="p-3 border">Roll No</th>
+                <th class="p-3 border">Admission No</th>
+                <th class="p-3 border">Father's Name</th>
+                <th class="p-3 border">Phone</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for std in students %}
+            <tr class="hover:bg-gray-50">
+                <td class="p-3 border">{{ std['full_name'] }}</td>
+                <td class="p-3 border">{{ std['grade_class'] }}-{{ std['section'] if std['section'] else '' }}</td>
+                <td class="p-3 border">{{ std['roll_no'] if std['roll_no'] else '-' }}</td>
+                <td class="p-3 border">{{ std['admission_no'] if std['admission_no'] else '-' }}</td>
+                <td class="p-3 border">{{ std['father_name'] if std['father_name'] else '-' }}</td>
+                <td class="p-3 border">{{ std['father_phone'] if std['father_phone'] else '-' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="p-3 text-center text-gray-500">No student records found. Upload an Excel sheet above or fill manual form.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

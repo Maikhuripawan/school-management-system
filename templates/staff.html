@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Staff Database Management</h1>
+    <div class="space-x-2">
+        <a href="/export/excel/staff" class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">📥 Export Excel</a>
+        <a href="/export/pdf/staff" class="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700">📥 Export PDF</a>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="p-4 mb-4 text-sm rounded bg-{{ 'green' if category == 'success' else 'red' }}-100 text-{{ 'green' if category == 'success' else 'red' }}-700">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded shadow lg:col-span-1">
+        <h2 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Add New Staff (Manual)</h2>
+        <form action="/staff" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-600">Full Name*</label>
+                <input type="text" name="full_name" class="w-full border p-2 rounded mt-1 text-sm" placeholder="e.g. Dr. Priya Sharma" required>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Gender* (M/F)</label>
+                    <select name="gender" class="w-full border p-2 rounded mt-1 text-sm" required>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Staff Type*</label>
+                    <select name="staff_type" class="w-full border p-2 rounded mt-1 text-sm" required>
+                        <option value="TEACHER">TEACHER</option>
+                        <option value="LAB_ASSISTANT">LAB ASSISTANT</option>
+                        <option value="LIBRARIAN">LIBRARIAN</option>
+                        <option value="PRINCIPAL">PRINCIPAL</option>
+                        <option value="ADMIN_STAFF">ADMIN STAFF</option>
+                        <option value="OTHER">OTHER</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600">Employee ID (Unique)</label>
+                <input type="text" name="employee_id" class="w-full border p-2 rounded mt-1 text-sm" placeholder="e.g. EMP1001">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Designation</label>
+                    <input type="text" name="designation" class="w-full border p-2 rounded mt-1 text-sm" placeholder="e.g. Lecturer">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Department</label>
+                    <input type="text" name="department" class="w-full border p-2 rounded mt-1 text-sm" placeholder="e.g. Science">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Phone</label>
+                    <input type="text" name="phone" class="w-full border p-2 rounded mt-1 text-sm" placeholder="10 Digit Number">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Email</label>
+                    <input type="email" name="email" class="w-full border p-2 rounded mt-1 text-sm" placeholder="name@school.edu">
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-green-600 text-white p-2 rounded font-semibold hover:bg-green-700 transition">Save Entry</button>
+        </form>
+    </div>
+
+    <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-lg font-semibold mb-2 text-gray-700">Bulk Upload Staff Sheet (.xlsx)</h2>
+            <p class="text-xs text-gray-500 mb-3">Make sure headers match the structure: Full Name*, Gender*, Staff Type*, Employee ID...</p>
+            <form action="/staff/upload" method="POST" enctype="multipart/form-data" class="flex flex-wrap gap-3">
+                <input type="file" name="file" accept=".xlsx, .xls" class="border p-1.5 rounded text-sm bg-gray-50 flex-grow" required>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700">Upload Excel</button>
+            </form>
+        </div>
+
+        <div class="bg-white p-4 rounded shadow overflow-x-auto">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Registered Staff Records</h2>
+            <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-700 uppercase text-xs">
+                        <th class="p-3 border">Emp ID</th>
+                        <th class="p-3 border">Name</th>
+                        <th class="p-3 border">Type</th>
+                        <th class="p-3 border">Designation</th>
+                        <th class="p-3 border">Department</th>
+                        <th class="p-3 border">Contact No</th>
+                        <th class="p-3 border">Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in staff %}
+                    <tr class="hover:bg-gray-50 border-b">
+                        <td class="p-3 font-semibold text-blue-600">{{ member['employee_id'] if member['employee_id'] else '-' }}</td>
+                        <td class="p-3 font-medium text-gray-800">{{ member['full_name'] }}</td>
+                        <td class="p-3"><span class="bg-gray-200 text-gray-800 px-2 py-0.5 rounded text-xs">{{ member['staff_type'] }}</span></td>
+                        <td class="p-3 text-gray-600">{{ member['designation'] if member['designation'] else '-' }}</td>
+                        <td class="p-3 text-gray-600">{{ member['department'] if member['department'] else '-' }}</td>
+                        <td class="p-3 text-gray-600">{{ member['phone'] if member['phone'] else '-' }}</td>
+                        <td class="p-3 text-gray-600">{{ member['email'] if member['email'] else '-' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="p-4 text-center text-gray-500">No staff records found. Add manually or upload Excel template.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

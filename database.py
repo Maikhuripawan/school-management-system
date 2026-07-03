@@ -1,13 +1,32 @@
-import sqlite3
+import os
+import psycopg2  # SQLite ki jagah PostgreSQL use karne ke liye
+
+# Render ka database URL uthane ke liye (Local testing ke liye fallback rakha hai)
+DATABASE_URL = os.environ.get('DATABASE_URL') or "postgres://schooladmin:your_password@localhost:5432/schooldb"
+
+def get_db_connection():
+    if DATABASE_URL:
+        return psycopg2.connect(DATABASE_URL)
+    raise Exception("DATABASE_URL Environment Variable nahi mila!")
 
 def init_db():
-    conn = sqlite3.connect('school.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 1. Students Table
+    # 1. Users Table (Multiple Users aur Roles ke liye)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT 'staff'
+        )
+    ''')
+    
+    # 2. Students Table (Aapke saare purane columns ke sath, SERIAL primary key)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS students (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             full_name TEXT NOT NULL,
             gender TEXT NOT NULL,
             grade_class TEXT NOT NULL,
@@ -53,10 +72,10 @@ def init_db():
         )
     ''')
     
-    # 2. Staff Table
+    # 3. Staff Table (Aapke saare purane columns ke sath, SERIAL primary key)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS staff (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             full_name TEXT NOT NULL,
             gender TEXT NOT NULL,
             staff_type TEXT NOT NULL,
@@ -80,9 +99,24 @@ def init_db():
         )
     ''')
     
+    # 4. Default 2 Users automatically create karne ke liye (Username: admin aur staff1)
+    # Dono ka login password abhi 'school123' rakha hai. Koi aur user chahiye toh yahan add kar sakte hain.
+    cursor.execute('''
+        INSERT INTO users (username, password, role) 
+        VALUES ('admin', 'school123', 'admin')
+        ON CONFLICT (username) DO NOTHING
+    ''')
+    
+    cursor.execute('''
+        INSERT INTO users (username, password, role) 
+        VALUES ('staff1', 'school123', 'staff')
+        ON CONFLICT (username) DO NOTHING
+    ''')
+    
     conn.commit()
+    cursor.close()
     conn.close()
 
 if __name__ == '__main__':
     init_db()
-    print("Database and Tables created successfully!")
+    print("PostgreSQL Database, Tables aur Default Users kamyabi se ban gaye hain!")

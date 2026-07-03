@@ -26,9 +26,11 @@ def get_db_connection():
 # --- AUTO INITIALIZE DATABASE ---
 try:
     import database
-    database.init_db()
+    print("Zabardasti Database Initialize kar rahe hain... - app.py:29")
+    database.init_db()  # Yeh line aapki users table ko force create karegi
+    print("Database Initialization Successful! - app.py:31")
 except Exception as e:
-    print(f"Database initialization info/error: {str(e)} - app.py:31")
+    print(f"Database initialization info/error: {str(e)} - app.py:33")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 

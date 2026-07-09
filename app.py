@@ -59,7 +59,7 @@ def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get('role') != 'admin':
-            flash("Yeh page dekhne ki ijaazat sirf Admin ko hai!", "danger")
+            flash("Access Denied! Only administrators can access this page", "danger")
             return redirect(url_for('index'))
         return f(*args, **kwargs)
     return decorated_function
@@ -116,10 +116,10 @@ def manage_users():
                 (new_username, new_password, new_role)
             )
             conn.commit()
-            flash(f"User '{new_username}' kamyabi se ban gaya!", "success")
+            flash(f"User '{new_username}' Registration successful! You can now log in using your credentials!", "success")
         except Exception as e:
             conn.rollback()
-            flash("Error: Yeh Username pehle se maujood hai!", "danger")
+            flash("❌ Username already exists.!", "danger")
             
     cursor.execute("SELECT id, username, role FROM users ORDER BY id DESC")
     all_users = cursor.fetchall()
